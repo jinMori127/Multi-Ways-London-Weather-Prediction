@@ -6,58 +6,7 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from utils import plot_prediction_vs_actual , plot_losses
-
-
-def load_weather_data(filepath, batch_size, seq_length):
-    # Load and preprocess the data
-    data = pd.read_csv(filepath, parse_dates=['date'])
-    data.fillna({
-      "cloud_cover" : data["cloud_cover"].mode()[0],
-      "global_radiation" : data["global_radiation"].mean(),
-      "mean_temp": data["mean_temp"].mean()
-    }, inplace=True)
-    data.dropna(inplace=True)
-    data['date'] = pd.to_datetime(data['date'])
-
-    # Select relevant features
-    features = ['cloud_cover', 'sunshine', 'global_radiation', 'max_temp', 'mean_temp', 'min_temp', 'pressure']
-    data = data[features]
-
-    # Scale the data
-    scaler = StandardScaler()
-    data_scaled = scaler.fit_transform(data)
-
-    # Create sequences
-    X, y = [], []
-    for i in range(len(data_scaled) - seq_length):
-        X.append(data_scaled[i:i + seq_length])
-        y.append(data_scaled[i + seq_length])
-    X, y = np.array(X), np.array(y)
-
-    # Split into train, eval, and test sets
-    X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.3, random_state=1)
-    X_eval, X_test, y_eval, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=1)
-
-    # Convert to tensors
-    X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
-    y_train_tensor = torch.tensor(y_train, dtype=torch.float32)
-    X_eval_tensor = torch.tensor(X_eval, dtype=torch.float32)
-    y_eval_tensor = torch.tensor(y_eval, dtype=torch.float32)
-    X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
-    y_test_tensor = torch.tensor(y_test, dtype=torch.float32)
-
-    # Create datasets
-    train_dataset = torch.utils.data.TensorDataset(X_train_tensor, y_train_tensor)
-    eval_dataset = torch.utils.data.TensorDataset(X_eval_tensor, y_eval_tensor)
-    test_dataset = torch.utils.data.TensorDataset(X_test_tensor, y_test_tensor)
-
-    # Create dataloaders
-    trainloader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    evalloader = torch.utils.data.DataLoader(eval_dataset, batch_size=batch_size, shuffle=False)
-    testloader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
-
-    return trainloader, evalloader, testloader, scaler, features, len(features), seq_length
+from utils import *
 
 
 # Define Hybrid Model

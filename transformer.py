@@ -5,49 +5,10 @@ import torch.nn as nn
 import torch.optim as optim
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
-from utils import plot_prediction_vs_actual, plot_losses
+from utils import *
 
 # Load data
-traning_loss = []
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-filepath = 'london_weather.csv'
-data = pd.read_csv(filepath)
-
-# Convert date to datetime format
-data['date'] = pd.to_datetime(data['date'])
-
-# Define features (excluding 'snow_depth')
-features = ['cloud_cover', 'sunshine', 'global_radiation', 'max_temp', 'mean_temp', 'min_temp', 'pressure']
-data = data[features]
-data.fillna({
-    "cloud_cover" : data["cloud_cover"].mode(),
-    "global_radiation" : data["global_radiation"].mean(),
-    "mean_temp": data["mean_temp"].mean()
-}, inplace=True)
-#Drop the remaining rows that have missing values
-data.dropna(inplace=True)
-
-# Normalize features
-scaler = StandardScaler()
-data_scaled = scaler.fit_transform(data)
-
-# Create sequences
-sequence_length = 30  # Number of days to consider for each sequence
-X, y = [], []
-for i in range(len(data_scaled) - sequence_length):
-    X.append(data_scaled[i:i + sequence_length])
-    y.append(data_scaled[i + sequence_length])
-X, y = np.array(X), np.array(y)
-
-# Split the data
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
-
-# Convert to PyTorch tensors
-X_train_tensor = torch.tensor(X_train, dtype=torch.float32).to(device=device)
-y_train_tensor = torch.tensor(y_train, dtype=torch.float32).to(device=device)
-X_test_tensor = torch.tensor(X_test, dtype=torch.float32).to(device=device)
-y_test_tensor = torch.tensor(y_test, dtype=torch.float32).to(device=device)
 
 class TransformerRegressor(nn.Module):
     def __init__(self, input_dim, output_dim, seq_length, num_heads=9, num_layers=2, hidden_dim=72):
@@ -56,7 +17,7 @@ class TransformerRegressor(nn.Module):
         self.seq_length = seq_length
 
         self.embedding = nn.Linear(input_dim, hidden_dim)
-        encoder_layers = nn.TransformerEncoderLayer(d_model=hidden_dim, nhead=num_heads, batch_first=True)
+        encoder_layers = nn.TransformerEncoderLayer(d_model=hidden_dim, nhead=num_heads, batch_first=True, dropout= 0.25)
         self.transformer_encoder = nn.TransformerEncoder(encoder_layers, num_layers=num_layers)
         self.fc = nn.Linear(hidden_dim, output_dim)
 
@@ -69,41 +30,82 @@ class TransformerRegressor(nn.Module):
         return x
 
 
-def train_transform():
+def train_transform(trainloader,evalloader, testloader, scaler, features, input_dim, seq_length , device):
     # Define and train the model
-    model = TransformerRegressor(input_dim=len(features), output_dim=len(features), seq_length=sequence_length, num_heads=10, hidden_dim=80).to(device)
+    list_train_loss = []
+    list_eval_loss = []
+
+    model = TransformerRegressor(input_dim=input_dim, output_dim=len(features), seq_length=seq_length, num_heads=10, hidden_dim=80).to(device)
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-    num_epochs = 25
+    num_epochs = 30
     for epoch in range(num_epochs):
         model.train()
-        optimizer.zero_grad()
 
-        outputs = model(X_train_tensor)
-        loss = criterion(outputs, y_train_tensor)
-        traning_loss.append(loss.item())
-        loss.backward()
-        optimizer.step()
+        # Training
+        running_loss = 0.0
+        for inputs, labels in trainloader:
+            inputs, labels = inputs.to(device), labels.to(device)
+            optimizer.zero_grad()
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+            running_loss += loss.item()
 
-        print(f'Epoch {epoch+1}/{num_epochs}, Loss: {loss.item()}')
+        epoch_loss = running_loss / len(trainloader.dataset)
+        list_train_loss.append(epoch_loss)
 
-    # Evaluate the model
+        # Evaluation
+        model.eval()
+
+        with torch.no_grad():
+            test_loss = 0.0
+            for inputs, labels in evalloader:
+                inputs, labels = inputs.to(device), labels.to(device)
+                outputs = model(inputs)
+                loss = criterion(outputs, labels)
+                test_loss += loss.item()
+
+            eval_loss = test_loss / len(evalloader.dataset)
+            list_eval_loss.append(eval_loss)
+        print(f"Epoch {epoch+1}/{num_epochs}, Train Loss: {epoch_loss:.4f}, Validation Loss: {eval_loss:.4f}")
+
+    # test model
     model.eval()
     with torch.no_grad():
-        predictions = model(X_test_tensor).cpu().numpy()
-        actual = y_test_tensor.cpu().numpy()
+        predictions, actuals = [], []
+        for inputs, labels in testloader:
+            inputs, labels = inputs.to(device), labels.to(device)
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            predictions.append(outputs.cpu())
+            actuals.append(labels.cpu())
+    print("test loss: ", loss.item())
+    predictions = torch.cat(predictions).numpy()
+    actuals = torch.cat(actuals).numpy()
 
     # Reverse scaling
     predictions_inv = scaler.inverse_transform(predictions)
-    actual_inv = scaler.inverse_transform(actual)
+    actuals_inv = scaler.inverse_transform(actuals)
 
     # Plot predictions vs actual values
     torch.save(model.state_dict(), 'weather_transformer_net.pth')
 
-    plot_prediction_vs_actual(predictions_inv, actual_inv, features, save_dir='transformer_plots')
-    plot_losses(loss_val=[], loss_train=traning_loss, save_dir='transformer_plots')
+    plot_prediction_vs_actual(predictions_inv, actuals_inv, features, save_dir='transformer_plots')
+    plot_prediction_vs_actual(predictions_inv, actuals_inv, features, save_dir='transformer_plots', apply_mean=True)
 
+    plot_losses(loss_val=list_eval_loss, loss_train=list_train_loss, save_dir='transformer_plots')
+    plot_error(predictions, actuals, labels=['cloud_cover', 'sunshine', 'global_radiation', 'max_temp', 'mean_temp', 'min_temp', 'pressure'], save_dir='transformer_plots')
 
-train_transform()
+batch_size = 64
+seq_length = 30
+
+trainloader,evalloader, testloader, scaler, features, input_dim, seq_length = load_weather_data('london_weather.csv', batch_size, seq_length,)
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+train_transform(trainloader,evalloader, testloader, scaler, features, input_dim, seq_length, device=device)
+
 print("done training")

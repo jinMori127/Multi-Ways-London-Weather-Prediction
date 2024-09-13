@@ -185,10 +185,9 @@ def train(input_dim, hidden_dim, output_dim, num_layers, dropout, trainloader, v
     label_columns = ['cloud_cover','sunshine','global_radiation','max_temp','mean_temp','min_temp','precipitation','pressure', 'snow_depth']
     
     errors = actuals - predictions
-    plot_error_histogram(errors.numpy(), save_dir='lstm_attention_plots')
     plot_relative_errors(predictions.numpy(), actuals.numpy())
     plot_prediction_vs_actual(predictions, actuals, label_columns, save_dir='lstm_attention_plots')
-
+    plot_prediction_vs_actual(predictions, actuals, label_columns, save_dir='lstm_attention_plots', apply_mean=True)
 
 train(input_dim, hidden_dim, output_dim, num_layers, dropout, trainloader, valloader, testloader)
 
@@ -198,4 +197,5 @@ train(input_dim, hidden_dim, output_dim, num_layers, dropout, trainloader, vallo
 # criterion = CustomLoss()
 # predictions, actuals = test_model(testloader, weather_net, criterion, device)
 # label_columns = ['cloud_cover','sunshine','global_radiation','max_temp','mean_temp','min_temp','precipitation','pressure', 'snow_depth']
-# plot_predictionVSactual(predictions, actuals, label_columns)
+# # plot_prediction_vs_actual(predictions, actuals, label_columns, save_dir='lstm_attention_plots', apply_mean=True)
+# plot_error(predictions, actuals,label_columns, save_dir='lstm_attention_plots')

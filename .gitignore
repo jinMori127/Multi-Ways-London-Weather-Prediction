@@ -1,2 +1,5 @@
 *.json
 *.pyc
+*.pth
+*.docx
+*.pdf

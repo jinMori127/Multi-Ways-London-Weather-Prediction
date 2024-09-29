@@ -96,7 +96,7 @@ def train_transform(trainloader,evalloader, testloader, scaler, features, input_
         detection_rate, direction_of_error = calculate_metrics(predictions_inv_tensor, actuals_inv_tensor)
         detection_rates.append(detection_rate)
 
-        print(f"Epoch {epoch+1}/{num_epochs}, Train Loss: {epoch_loss:.4f}, Validation Loss: {eval_loss:.4f}")
+        print(f"Epoch {epoch+1}/{num_epochs}, Train Loss: {epoch_loss:.4f}, Validation Loss: {eval_loss:.4f}, error :{detection_rate:.4f}")
 
     # test model
     model.eval()

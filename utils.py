@@ -77,7 +77,6 @@ def load_weather_data(batch_size):
     return trainloader, valloader, testloader, 3 #, scaler  # Return scaler for inverse transformation if needed
 
 
-# data preberation function 
 def load_weather_data_transformer(filepath, batch_size, seq_length):
     # Load and preprocess the data
     data = pd.read_csv(filepath, parse_dates=['date'])
@@ -97,23 +96,28 @@ def load_weather_data_transformer(filepath, batch_size, seq_length):
     scaler = StandardScaler()
     data_scaled = scaler.fit_transform(data)
 
-    # Create sequences
-    X, y = [], []
-    for i in range(len(data_scaled) - seq_length):
-        X.append(data_scaled[i:i + seq_length])
-        y.append(data_scaled[i + seq_length])
-    X, y = np.array(X), np.array(y)
-
-    # Calculate the indices for splitting
-    total_len = len(X)
+    # Calculate the indices for splitting (before creating sequences)
+    total_len = len(data_scaled)
     train_size = int(total_len * 0.8)  # First 80% for training
     val_size = int(total_len * 0.1)    # Next 10% for validation
     test_size = total_len - train_size - val_size  # Remaining 10% for test
 
-    # Split the data based on calculated sizes
-    X_train, y_train = X[:train_size], y[:train_size]
-    X_eval, y_eval = X[train_size:train_size + val_size], y[train_size:train_size + val_size]
-    X_test, y_test = X[train_size + val_size:], y[train_size + val_size:]
+    # Split the data
+    train_data = data_scaled[:train_size]
+    val_data = data_scaled[train_size:train_size + val_size]
+    test_data = data_scaled[train_size + val_size:]
+
+    # Create sequences after splitting
+    def create_sequences(data, seq_length):
+        X, y = [], []
+        for i in range(len(data) - seq_length):
+            X.append(data[i:i + seq_length])
+            y.append(data[i + seq_length])
+        return np.array(X), np.array(y)
+
+    X_train, y_train = create_sequences(train_data, seq_length)
+    X_eval, y_eval = create_sequences(val_data, seq_length)
+    X_test, y_test = create_sequences(test_data, seq_length)
 
     # Convert to tensors
     X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
@@ -134,6 +138,7 @@ def load_weather_data_transformer(filepath, batch_size, seq_length):
     testloader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
     return trainloader, evalloader, testloader, scaler, features, len(features), seq_length
+
 
 
 ###########################################################################################################################

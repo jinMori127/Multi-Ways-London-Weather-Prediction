@@ -39,9 +39,9 @@ def train_transform(trainloader,evalloader, testloader, scaler, features, input_
 
     model = TransformerRegressor(input_dim=input_dim, output_dim=len(features), seq_length=seq_length, num_heads=10, hidden_dim=80).to(device)
     criterion = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    optimizer = optim.Adam(model.parameters(), lr=0.0001)
 
-    num_epochs = 30
+    num_epochs = 40
     for epoch in range(num_epochs):
         model.train()
 
@@ -128,9 +128,9 @@ def train_transform(trainloader,evalloader, testloader, scaler, features, input_
     plot_error(predictions, actuals, labels=['cloud_cover', 'sunshine', 'global_radiation', 'max_temp', 'mean_temp', 'min_temp', 'pressure'], save_dir='transformer_plots')
 
 batch_size = 64
-seq_length = 30
+seq_length = 7
 
-trainloader,evalloader, testloader, scaler, features, input_dim, seq_length = load_weather_data_transformer('london_weather.csv', batch_size, seq_length,)
+trainloader,evalloader, testloader, scaler, features, input_dim, seq_length = load_weather_data_transformer('london_weather.csv', batch_size, seq_length)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 

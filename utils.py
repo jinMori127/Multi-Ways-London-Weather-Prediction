@@ -6,75 +6,7 @@ from sklearn.preprocessing import StandardScaler
 import torch
 import numpy as np
 from sklearn.model_selection import train_test_split
-from torch.utils.data import Dataset, DataLoader
-    
-class WeatherDataset(Dataset):
-    def __init__(self, data, label_columns=None):
-        self.features = data.drop(label_columns, axis=1)
-        self.features['year'] = self.features['date'].dt.year
-        self.features['month'] = self.features['date'].dt.month
-        self.features['day'] = self.features['date'].dt.day
-        self.features.drop('date', axis=1, inplace=True)
-        self.labels = data[label_columns].values
-        self.scaler = StandardScaler()
-        self.features = self.scaler.fit_transform(self.features.values)
-
-    def __len__(self):
-        return len(self.labels)
-
-    def __getitem__(self, idx):
-        return torch.tensor(self.features[idx], dtype=torch.float32), torch.tensor(self.labels[idx], dtype=torch.float32)
-
-   
-def load_weather_data(batch_size):
-    full_data = pd.read_csv('london_weather.csv', parse_dates=['date'])
-    
-    # Fill missing values
-    full_data.fillna({
-        "cloud_cover": full_data["cloud_cover"].mode()[0],
-        "global_radiation": full_data["global_radiation"].mean(),
-        "mean_temp": full_data["mean_temp"].mean()
-    }, inplace=True)
-    
-    # Drop any remaining rows with NaN values
-    full_data.dropna(inplace=True)
-
-    # Specify feature columns for scaling
-    features = ['cloud_cover', 'sunshine', 'global_radiation', 'max_temp', 'mean_temp', 'min_temp', 'pressure']
-
-    columns_to_keep = ['date'] + features
-
-    # Filter the DataFrame to keep only the desired columns
-    full_data = full_data[columns_to_keep]
-
-    # Create a new DataFrame with original data for date handling
-    scaled_data = full_data.copy()
-    
-    # # Scale the feature data
-    # scaler = StandardScaler()
-    # scaled_data[features] = scaler.fit_transform(scaled_data[features])
-
-    # Calculate the indices for splitting
-    train_size = int(len(scaled_data) * 0.8)      # First 80%
-    val_size = int(len(scaled_data) * 0.1)        # Next 10%
-    
-    # Split the data
-    train_data = scaled_data.iloc[:train_size]     # First 80%
-    val_data = scaled_data.iloc[train_size:train_size + val_size]  # Next 10%
-    test_data = scaled_data.iloc[train_size + val_size:]  # Last 10%
-
-
-    # Create DataLoaders
-    trainloader = DataLoader(WeatherDataset(data=train_data, label_columns=features), batch_size=batch_size, shuffle=True, pin_memory=True)
-    valloader = DataLoader(WeatherDataset(data=val_data, label_columns=features), batch_size=batch_size, shuffle=False, pin_memory=True)
-    testloader = DataLoader(WeatherDataset(data=test_data, label_columns=features), batch_size=batch_size, shuffle=False, pin_memory=True)
-    
-    # Print the date ranges for each dataset
-    print(f"Training data date range: {train_data['date'].min()} to {train_data['date'].max()}")
-    print(f"Validation data date range: {val_data['date'].min()} to {val_data['date'].max()}")
-    print(f"Test data date range: {test_data['date'].min()} to {test_data['date'].max()}")
-
-    return trainloader, valloader, testloader, 3 #, scaler  # Return scaler for inverse transformation if needed
+from torch.utils.data import TensorDataset, DataLoader
 
 
 def load_weather_data_transformer(filepath, batch_size, seq_length):
@@ -128,14 +60,14 @@ def load_weather_data_transformer(filepath, batch_size, seq_length):
     y_test_tensor = torch.tensor(y_test, dtype=torch.float32)
 
     # Create datasets
-    train_dataset = torch.utils.data.TensorDataset(X_train_tensor, y_train_tensor)
-    eval_dataset = torch.utils.data.TensorDataset(X_eval_tensor, y_eval_tensor)
-    test_dataset = torch.utils.data.TensorDataset(X_test_tensor, y_test_tensor)
+    train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
+    eval_dataset = TensorDataset(X_eval_tensor, y_eval_tensor)
+    test_dataset = TensorDataset(X_test_tensor, y_test_tensor)
 
     # Create dataloaders
-    trainloader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    evalloader = torch.utils.data.DataLoader(eval_dataset, batch_size=batch_size, shuffle=False)
-    testloader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    trainloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    evalloader = DataLoader(eval_dataset, batch_size=batch_size, shuffle=False)
+    testloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
     return trainloader, evalloader, testloader, scaler, features, len(features), seq_length
 
@@ -260,7 +192,7 @@ def calculate_metrics(predictions, actuals, threshold=5.0):  # Change threshold 
     # Calculate average error
 
     # Define extreme value threshold (e.g., top 90th percentile)
-    extreme_threshold = np.percentile(actuals.numpy(), 90)
+    extreme_threshold = np.percentile(actuals.numpy(), 95)
 
     # Determine detections within the similarity threshold
     detected_extremes = (predictions.numpy() > (extreme_threshold - threshold)).astype(int)

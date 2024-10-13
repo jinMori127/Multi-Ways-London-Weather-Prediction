@@ -49,6 +49,7 @@ def train_hybrid_model(trainloader,evalloader, testloader, input_dim, hidden_dim
     print(f"You are using: {device}")
     list_train_loss = []
     list_eval_loss = []
+    detection_rates = []
 
     # Initialize model
     model = HybridModel(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers, dropout=dropout, num_heads=num_heads, transformer_hidden_dim=transformer_hidden_dim).to(device)
@@ -79,15 +80,40 @@ def train_hybrid_model(trainloader,evalloader, testloader, input_dim, hidden_dim
 
         with torch.no_grad():
             test_loss = 0.0
+            all_outputs = []
+            all_labels = []
             for inputs, labels in evalloader:
                 inputs, labels = inputs.to(device), labels.to(device)
                 outputs = model(inputs)
                 loss = criterion(outputs, labels)
                 test_loss += loss.item()
+                all_outputs.append(outputs.cpu())
+                all_labels.append(labels.cpu())
+
 
             eval_loss = test_loss / len(evalloader.dataset)
             list_eval_loss.append(eval_loss)
-        print(f"Epoch {epoch+1}/{num_epochs}, Train Loss: {epoch_loss:.4f}, Validation Loss: {eval_loss:.4f}")
+
+        # Calculate metrics
+        predictions = torch.cat(all_outputs)
+        actuals = torch.cat(all_labels)
+
+        # Inverse transform predictions and actuals
+        predictions_np = predictions.numpy()
+        actuals_np = actuals.numpy()
+        
+        predictions_inv = scaler.inverse_transform(predictions_np)
+        actuals_inv = scaler.inverse_transform(actuals_np)
+
+        # Convert the inverse-transformed data back to PyTorch tensors
+        predictions_inv_tensor = torch.tensor(predictions_inv)
+        actuals_inv_tensor = torch.tensor(actuals_inv)
+
+        detection_rate, direction_of_error = calculate_metrics(predictions_inv_tensor, actuals_inv_tensor)
+        detection_rates.append(detection_rate)
+
+        print(f"Epoch {epoch+1}/{num_epochs}, Train Loss: {epoch_loss:.4f}, Validation Loss: {eval_loss:.4f} Detection Rate of Extremes: {detection_rate:.4f}")
+
 
     # test model
     model.eval()
@@ -108,18 +134,26 @@ def train_hybrid_model(trainloader,evalloader, testloader, input_dim, hidden_dim
     actuals_inv = scaler.inverse_transform(actuals)
     
     torch.save(model.state_dict(), "weather_lstm_with_transformer.pth")
+    epochs = list(range(1, num_epochs + 1))
+    plot_metrics(epochs, 2, detection_rates)
+    
     plot_prediction_vs_actual(predictions_inv, actuals_inv, features, save_dir="lstm_with_transformer_plots")
+    plot_prediction_vs_actual(predictions_inv, actuals_inv, features, save_dir="lstm_with_transformer_plots", apply_mean=True)
     plot_losses(loss_val=list_eval_loss, loss_train=list_train_loss, save_dir="lstm_with_transformer_plots")
+
+    label_columns =['cloud_cover', 'sunshine', 'global_radiation', 'max_temp', 'mean_temp', 'min_temp', 'pressure']
+    plot_error(predictions, actuals,label_columns, save_dir='lstm_with_transformer_plots')
+
 
 # Parameters
 batch_size = 64
-seq_length = 30
+seq_length = 7
 hidden_dim = 256
 num_layers = 2
 dropout = 0.2
 num_heads = 8
 transformer_hidden_dim = 72
 
-trainloader,evalloader, testloader, scaler, features, input_dim, seq_length = load_weather_data('london_weather.csv', batch_size, seq_length)
+trainloader,evalloader, testloader, scaler, features, input_dim, seq_length = load_weather_data_transformer('london_weather.csv', batch_size, seq_length)
 output_dim = len(features)
 train_hybrid_model(trainloader,evalloader, testloader, input_dim, hidden_dim, output_dim, num_layers, dropout, seq_length, num_heads, transformer_hidden_dim)

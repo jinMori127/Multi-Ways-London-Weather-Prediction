@@ -132,7 +132,9 @@ def train_hybrid_model(trainloader,evalloader, testloader, input_dim, hidden_dim
     # Reverse scaling
     predictions_inv = scaler.inverse_transform(predictions)
     actuals_inv = scaler.inverse_transform(actuals)
-    
+
+    torch.save(predictions_inv, 'lstmwithtrans_predictions_inv.pt')
+
     torch.save(model.state_dict(), "weather_lstm_with_transformer.pth")
     epochs = list(range(1, num_epochs + 1))
     plot_metrics(epochs, 2, detection_rates)

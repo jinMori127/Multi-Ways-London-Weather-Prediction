@@ -167,6 +167,9 @@ def train(input_dim, hidden_dim, output_dim, num_layers, dropout, trainloader, v
     predictions_inv = scaler.inverse_transform(predictions)
     actuals_inv = scaler.inverse_transform(actuals)
 
+    torch.save(predictions_inv, 'lstm_predictions_inv.pt')
+    torch.save(actuals_inv, 'actuals_inv.pt')
+
     label_columns = ['cloud_cover', 'sunshine', 'global_radiation', 'max_temp', 'mean_temp', 'min_temp', 'pressure']
 
     # plot_relative_errors(predictions.numpy(), actuals.numpy())

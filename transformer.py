@@ -116,6 +116,8 @@ def train_transform(trainloader,evalloader, testloader, scaler, features, input_
     predictions_inv = scaler.inverse_transform(predictions)
     actuals_inv = scaler.inverse_transform(actuals)
 
+    torch.save(predictions_inv, 'transformer_predictions_inv.pt')
+
     # Plot predictions vs actual values
     torch.save(model.state_dict(), 'weather_transformer_net.pth')
     epochs = list(range(1, num_epochs + 1))
@@ -130,7 +132,7 @@ def train_transform(trainloader,evalloader, testloader, scaler, features, input_
 batch_size = 64
 seq_length = 7
 
-trainloader,evalloader, testloader, scaler, features, input_dim, seq_length = load_weather_data_transformer('london_weather.csv', batch_size, seq_length)
+trainloader, evalloader, testloader, scaler, features, input_dim, seq_length = load_weather_data_transformer('london_weather.csv', batch_size, seq_length)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 

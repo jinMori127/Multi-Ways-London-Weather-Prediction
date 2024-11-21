@@ -145,6 +145,82 @@ At this folder there is also the same plots but we done mean to the to make the 
   5 degrees of the actual temperature. 
 
 
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+### Transformer Network results:
+![image](https://github.com/user-attachments/assets/ac0299a1-3bcd-4e71-a7a4-5f01cc3a5ee1)
+
+#### Prediction Visualization  
+
+  ![image](https://github.com/user-attachments/assets/b53295ea-94b7-4deb-b0ff-fd3b189fb293)
+  
+  ![image](https://github.com/user-attachments/assets/903e1c79-e8ae-4620-82b2-fdfbda7976ad)
+  
+  ![image](https://github.com/user-attachments/assets/76ce2216-ac6c-48d5-b705-ceb9739f6dfb)
+  
+  There is more plots for full look at the results of the other feature you can take a look at the transformer_plots folder.
+  At this folder there is also the same plots but we done mean to the to make the plot smoother (plots names: <feature_name>_mean_xx )
+
+
+#### Error Visualization 
+
+  ![image](https://github.com/user-attachments/assets/97db7bbd-fc7f-495b-8aee-68359ac3fd06)
+  
+  As we can see, we were able to predict the cloud cover within a range of 0 to 2 of the 
+  actual cover. 
+
+  ![image](https://github.com/user-attachments/assets/95c75783-50c3-4882-8455-7f15a90d62d1)
+  
+  As we can see, we were able to predict the global radiation within a range of 0 to 1 of the 
+  actual (as we can see there is a pretty good improvement here from the lstm). 
+
+
+  ![image](https://github.com/user-attachments/assets/b2b13b23-72c7-44f4-aaa6-345785d46ce9)
+  
+  As we can see, we were able to predict the maximum temperature within a range of 0 to 
+  1 degrees of the actual temperature. 
+
+
+  to take a full look at the error plots visit the folder transformer_plots/error_plot.
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+
+### Lstm with Transformer Network results:
+
+![image](https://github.com/user-attachments/assets/34575267-b457-4d2f-a2c3-5aeca8df07b0)
+
+#### Prediction Visualization  
+
+  ![image](https://github.com/user-attachments/assets/cbec83df-f32f-4b52-a1da-ce6e4dc94392)
+  
+  ![image](https://github.com/user-attachments/assets/50332aba-b401-4aa5-8ce1-3b980e0c3945)
+  
+  ![image](https://github.com/user-attachments/assets/f1be57ea-4bdf-458d-9d6f-dfdbb37281fc)
+
+  There is more plots for full look at the results of the other feature you can take a look at the lstm_with_transformer_plots folder.
+  At this folder there is also the same plots but we done mean to the to make the plot smoother (plots names: <feature_name>_mean_xx )
+
+
+#### Error Visualization 
+
+  ![image](https://github.com/user-attachments/assets/f9a1aee7-673b-4218-8540-b669756458c4)
+
+  As we can see, we were able to predict the cloud cover within a range of 0 to 2 of the 
+  actual cover. 
+
+  ![image](https://github.com/user-attachments/assets/e13b21bc-bac5-4e23-a2b2-40f3496e49a4)
+
+  As we can see, we were able to predict the global radiation within a range of 0 to 1 of the 
+  actual (as we can see there is a pretty good improvement here from the lstm). 
+
+  ![image](https://github.com/user-attachments/assets/707b6327-1cd5-4ee7-8d63-b12ddfed0ad6)
+  As we can see, we were able to predict the maximum temperature within a range of 0 to 
+  0.8 degrees of the actual temperature (which is a improvment from the past two models). 
+
+  to take a full look at the error plots visit the folder lstm_with_transformer_plots/error_plot.
+
 
 ## Acknowledgments  
 This project was developed as part of the BSc Computer Science program at the University of Haifa. Special thanks to the Department of Computer Science for their support, especially Dr. Dan Rosenbaum.

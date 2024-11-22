@@ -57,7 +57,7 @@ We define `TransformerEncoderLayer`, which is the fundamental building block of 
 - hidden_dim = 80  
 - num_heads = 10  
 
-We used Adam optimizer with `learning_rate=0.001`.  
+We used Adam optimizer with `learning_rate=0.00001`.  
 - Num_epochs = 100
 
 ### 3. Hybrid LSTM-Transformer  

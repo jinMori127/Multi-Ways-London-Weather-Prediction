@@ -118,6 +118,8 @@ These visualizations help to clearly assess how well the model captures the unde
 
 There is more plots for full look at the results of the other feature you can take a look at the lstm_attention_plots folder.
 At this folder there is also the same plots but we done mean to the to make the plot smoother (plots names: <feature_name>_mean_xx )
+[View LSTM Attention Plots](./lstm_attention_plots/)
+
 
 #### Error Visualization 
   For more clarification we will show some plots for the error we get actual vs predicted  

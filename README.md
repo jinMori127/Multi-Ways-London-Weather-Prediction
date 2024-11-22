@@ -254,6 +254,19 @@ At this folder there is also the same plots but we done mean to the to make the 
 
   ![image](https://github.com/user-attachments/assets/2bba376f-52de-4b11-99f9-ff8c56965b77)
 
+
+### You can also see comparisons:
+
+- **LSTM vs. Transformer Comparison**  
+  [View Model Comparison 1 vs. 2](./Model_Comparison_1_vs_2/)
+
+- **LSTM vs. LSTM-Transformer Comparison**  
+  [View Model Comparison 1 vs. 3](./Model_Comparison_1_vs_3/)
+
+- **Transformer vs. LSTM-Transformer Comparison**  
+  [View Model Comparison 2 vs. 3](./Model_Comparison_2_vs_3/)
+
+
   
 ## Acknowledgments  
 This project was developed as part of the BSc Computer Science program at the University of Haifa. Special thanks to the Department of Computer Science for their support, especially Dr. Dan Rosenbaum.

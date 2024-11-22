@@ -116,9 +116,12 @@ These visualizations help to clearly assess how well the model captures the unde
 
 ![image](https://github.com/user-attachments/assets/ffd0fab7-0d60-4fda-8c54-726fd5429c24)
 
-There is more plots for full look at the results of the other feature you can take a look at the lstm_attention_plots folder.
+There is more plots for full look at the results of the other feature you can take a look at the [LSTM Attention Plots](./lstm_attention_plots/)
+ folder.
 At this folder there is also the same plots but we done mean to the to make the plot smoother (plots names: <feature_name>_mean_xx )
-[View LSTM Attention Plots](./lstm_attention_plots/)
+
+
+
 
 
 #### Error Visualization 
@@ -157,7 +160,8 @@ At this folder there is also the same plots but we done mean to the to make the 
   
   ![image](https://github.com/user-attachments/assets/4aa82128-b96e-483a-9ca7-5efe2d53b332)
   
-  There is more plots for full look at the results of the other feature you can take a look at the transformer_plots folder.
+  There is more plots for full look at the results of the other feature you can take a look at the [Transformer Plots](./transformer_plots/)
+ folder.
   At this folder there is also the same plots but we done mean to the to make the plot smoother (plots names: <feature_name>_mean_xx )
 
 
@@ -198,7 +202,8 @@ At this folder there is also the same plots but we done mean to the to make the 
   
   ![image](https://github.com/user-attachments/assets/2893de03-2145-427a-8a8c-fa77bd071b6d)
 
-  There is more plots for full look at the results of the other feature you can take a look at the lstm_with_transformer_plots folder.
+  There is more plots for full look at the results of the other feature you can take a look at the [LSTM with Transformer Plots](./lstm_with_transformer_plots/)
+ folder.
   At this folder there is also the same plots but we done mean to the to make the plot smoother (plots names: <feature_name>_mean_xx )
 
 

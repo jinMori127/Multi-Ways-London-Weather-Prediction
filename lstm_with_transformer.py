@@ -150,11 +150,11 @@ def train_hybrid_model(trainloader,evalloader, testloader, input_dim, hidden_dim
 # Parameters
 batch_size = 64
 seq_length = 7
-hidden_dim = 256
-num_layers = 2
+hidden_dim = 512
+num_layers = 3
 dropout = 0.2
-num_heads = 8
-transformer_hidden_dim = 72
+num_heads = 10
+transformer_hidden_dim = 80
 
 trainloader,evalloader, testloader, scaler, features, input_dim, seq_length = load_weather_data_transformer('london_weather.csv', batch_size, seq_length)
 output_dim = len(features)

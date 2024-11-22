@@ -48,7 +48,7 @@ class Weather_network(nn.Module):
 
 
 class CustomLoss(nn.Module):
-    def __init__(self, base_loss=nn.L1Loss()):
+    def __init__(self, base_loss=nn.MSELoss()):
         super(CustomLoss, self).__init__()
         self.base_loss = base_loss
 
@@ -81,11 +81,11 @@ def test_model(testloader, model, criterion, device):
 
     return torch.cat(all_outputs), torch.cat(all_labels)
 
-batch_size = 128
+batch_size = 64
 trainloader,evalloader, testloader, scaler, features, input_dim, seq_length = load_weather_data_transformer('london_weather.csv', batch_size, seq_length=7)
 hidden_dim = 512
 num_layers = 3
-dropout = 0.25
+dropout = 0.2
 print(input_dim)
 
 def train(input_dim, hidden_dim, output_dim, num_layers, dropout, trainloader, valloader, testloader):
@@ -94,9 +94,9 @@ def train(input_dim, hidden_dim, output_dim, num_layers, dropout, trainloader, v
     weather_net.to(device)
 
     criterion = CustomLoss()
-    optimizer = optim.Adam(weather_net.parameters(), lr=0.0001)
+    optimizer = optim.Adam(weather_net.parameters(), lr=0.00001)
 
-    num_epochs = 50
+    num_epochs = 100
     train_losses = []
     valid_losses = []
     detection_rates = []

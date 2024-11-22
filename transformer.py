@@ -39,9 +39,9 @@ def train_transform(trainloader,evalloader, testloader, scaler, features, input_
 
     model = TransformerRegressor(input_dim=input_dim, output_dim=len(features), seq_length=seq_length, num_heads=10, hidden_dim=80).to(device)
     criterion = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.0001)
+    optimizer = optim.Adam(model.parameters(), lr=0.00001)
 
-    num_epochs = 40
+    num_epochs = 100
     for epoch in range(num_epochs):
         model.train()
 

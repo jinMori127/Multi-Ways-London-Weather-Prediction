@@ -33,9 +33,9 @@ We also used the attention mechanism size and at the end we apply softmax to the
 Fully connected layer takes input and return output with the wanted size.  
 
 **Parameters:**  
-- batch_size = 128  
+- batch_size = 64  
 - hidden_dim = 512  
-- output_dim = 9  
+- output_dim = 7  
 - lstm_num_layers = 3  
 - dropout = 0.05  
 We used Adam optimizer with learning rate=0.00001.
